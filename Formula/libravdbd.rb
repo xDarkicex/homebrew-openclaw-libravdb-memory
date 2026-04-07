@@ -1,37 +1,211 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/openclaw-memory-libravdb"
-  version "1.3.16"
+  version "1.3.17"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "22478e974aa280daeb5f63f3a5997ca8de37fc97e185c013014905bf3f3303f9"
+      sha256 "97c46e92ce2966090f1a650c0b47086d5556f33d42a62b210645328d041f24b4"
     else
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "a8343466900f30f12a25598c0ae760794ee150a01d7ffda69f79fcea92e0bfb4"
+      sha256 "300cd1fc191b4dee7ebaaddb677aadc23f533cefd7025df7e13b8c7332490ed6"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "cd649dc88018ede44addbe957b134ba9aaf6f76d6f984c32dafdcc2ad5282882"
+      sha256 "58c11489fac29365e4df581377045a19bb9bebdfc6832ed97da0028703ee68cb"
     else
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "684849334a4230f089ba0eb2b79c93edc123bc895c9b6025ae1e8fb150073d98"
+      sha256 "7701764151d929659bbf78a7772c9ac167fa1b72dbcb9bb5fc2c960c658e28e1"
     end
+  end
+
+  if OS.mac?
+    resource "onnxruntime" do
+      url "https://github.com/microsoft/onnxruntime/releases/download/v1.23.0/onnxruntime-osx-universal2-1.23.0.tgz"
+      sha256 :no_check
+    end
+  elsif OS.linux?
+    if Hardware::CPU.arm?
+      resource "onnxruntime" do
+        url "https://github.com/microsoft/onnxruntime/releases/download/v1.23.0/onnxruntime-linux-aarch64-1.23.0.tgz"
+        sha256 :no_check
+      end
+    else
+      resource "onnxruntime" do
+        url "https://github.com/microsoft/onnxruntime/releases/download/v1.23.0/onnxruntime-linux-x64-1.23.0.tgz"
+        sha256 :no_check
+      end
+    end
+  end
+
+  resource "nomic-embed-text-v1.5-model" do
+    url "https://huggingface.co/nomic-ai/nomic-embed-text-v1.5/resolve/main/onnx/model.onnx"
+    sha256 "147d5aa88c2101237358e17796cf3a227cead1ec304ec34b465bb08e9d952965"
+  end
+
+  resource "nomic-embed-text-v1.5-tokenizer" do
+    url "https://huggingface.co/nomic-ai/nomic-embed-text-v1.5/resolve/main/tokenizer.json"
+    sha256 "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66"
+  end
+
+  resource "all-minilm-l6-v2-model" do
+    url "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx"
+    sha256 "759c3cd2b7fe7e93933ad23c4c9181b7396442a2ed746ec7c1d46192c469c46e"
+  end
+
+  resource "all-minilm-l6-v2-tokenizer" do
+    url "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json"
+    sha256 "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0"
+  end
+
+  resource "t5-small-encoder" do
+    url "https://huggingface.co/optimum/t5-small/resolve/main/encoder_model.onnx"
+    sha256 "41d326633f1b85f526508cc0db78a5d40877c292c1b6dccae2eacd7d2a53480d"
+  end
+
+  resource "t5-small-decoder" do
+    url "https://huggingface.co/optimum/t5-small/resolve/main/decoder_model.onnx"
+    sha256 "0a1451011d61bcc796a87b7306c503562e910f110f884d0cc08532972c2cc584"
+  end
+
+  resource "t5-small-tokenizer" do
+    url "https://huggingface.co/optimum/t5-small/resolve/main/tokenizer.json"
+    sha256 "5f0ed8ab5b8cfa9812bb73752f1d80c292e52bcf5a87a144dc9ab2d251056cbb"
+  end
+
+  resource "t5-small-tokenizer-config" do
+    url "https://huggingface.co/optimum/t5-small/resolve/main/tokenizer_config.json"
+    sha256 "4969f8d76ef05a16553bd2b07b3501673ae8d36972aea88a0f78ad31a3ff2de9"
+  end
+
+  resource "t5-small-config" do
+    url "https://huggingface.co/optimum/t5-small/resolve/main/config.json"
+    sha256 "d112428e703aa7ea0d6b17a77e9739fcc15b87653779d9b7942d5ecbc61c00ed"
+  end
+
+  resource "provision" do
+    url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/provision.sh"
+    sha256 "4835cf3e11a5da087ada28a03797b3dc44962f0a2306ec2c1482851b24eb4448"
   end
 
   def install
     bin.install Dir["libravdbd*"].first => "libravdbd"
+
+    models_dir = prefix/"models"
+    runtime_dir = models_dir/"onnxruntime"
+    nomic_dir = models_dir/"nomic-embed-text-v1.5"
+    minilm_dir = models_dir/"all-minilm-l6-v2"
+    t5_dir = models_dir/"t5-small"
+
+    runtime_dir.mkpath
+    nomic_dir.mkpath
+    minilm_dir.mkpath
+    t5_dir.mkpath
+
+    resource("onnxruntime").stage do
+      cp_r Dir["onnxruntime-*"].first, runtime_dir
+    end
+
+    resource("nomic-embed-text-v1.5-model").stage do
+      cp "model.onnx", nomic_dir/"model.onnx"
+    end
+    resource("nomic-embed-text-v1.5-tokenizer").stage do
+      cp "tokenizer.json", nomic_dir/"tokenizer.json"
+    end
+    write_embedding_manifest(nomic_dir, "nomic-embed-text-v1.5", 768)
+
+    resource("all-minilm-l6-v2-model").stage do
+      cp "model.onnx", minilm_dir/"model.onnx"
+    end
+    resource("all-minilm-l6-v2-tokenizer").stage do
+      cp "tokenizer.json", minilm_dir/"tokenizer.json"
+    end
+    write_embedding_manifest(minilm_dir, "all-minilm-l6-v2", 384)
+
+    resource("t5-small-encoder").stage do
+      cp "encoder_model.onnx", t5_dir/"encoder_model.onnx"
+    end
+    resource("t5-small-decoder").stage do
+      cp "decoder_model.onnx", t5_dir/"decoder_model.onnx"
+    end
+    resource("t5-small-tokenizer").stage do
+      cp "tokenizer.json", t5_dir/"tokenizer.json"
+    end
+    resource("t5-small-tokenizer-config").stage do
+      cp "tokenizer_config.json", t5_dir/"tokenizer_config.json"
+    end
+    resource("t5-small-config").stage do
+      cp "config.json", t5_dir/"config.json"
+    end
+    write_summarizer_manifest(t5_dir, "t5-small")
+
+    libexec.install resource("provision")
+    chmod 0755, libexec/"provision.sh"
+  end
+
+  def post_install
+    (var/"clawdb/data").mkpath
+    (var/"clawdb/run").mkpath
+  end
+
+  def caveats
+    <<~EOS
+      libravdbd requires ONNX embedding models to function.  Models are
+      automatically provisioned during `brew install`.  To re-provision
+      or repair assets manually:
+
+        #{libexec}/provision.sh --target #{prefix}/models
+
+      Data directory:   #{var}/clawdb/data
+      Socket directory: #{var}/clawdb/run
+    EOS
+  end
+
+  private
+
+  def write_embedding_manifest(dir, profile, dimensions)
+    File.write(dir/"embedding.json", <<~JSON)
+      {
+        "backend": "onnx-local",
+        "profile": "#{profile}",
+        "family": "#{profile}",
+        "model": "model.onnx",
+        "tokenizer": "tokenizer.json",
+        "dimensions": #{dimensions},
+        "normalize": true,
+        "inputNames": ["input_ids", "attention_mask", "token_type_ids"],
+        "outputName": "last_hidden_state",
+        "pooling": "mean",
+        "addSpecialTokens": true
+      }
+    JSON
+  end
+
+  def write_summarizer_manifest(dir, profile)
+    File.write(dir/"summarizer.json", <<~JSON)
+      {
+        "backend": "onnx-local",
+        "profile": "#{profile}",
+        "family": "#{profile}",
+        "encoder": "encoder_model.onnx",
+        "decoder": "decoder_model.onnx",
+        "tokenizer": "tokenizer.json",
+        "maxContextTokens": 512
+      }
+    JSON
   end
 
   service do
     run [opt_bin/"libravdbd", "serve"]
-    environment_variables LIBRAVDB_RPC_ENDPOINT: "unix:#{ENV["HOME"]}/.clawdb/run/libravdb.sock"
+    environment_variables LIBRAVDB_RPC_ENDPOINT: "unix:#{var}/clawdb/run/libravdb.sock",
+                          LIBRAVDB_DB_PATH: "#{var}/clawdb/data",
+                          LIBRAVDB_SUMMARIZER_BACKEND: "bundled"
     keep_alive true
-    working_dir ENV["HOME"]
+    working_dir var/"clawdb"
   end
 
   test do
