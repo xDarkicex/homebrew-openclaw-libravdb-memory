@@ -1,43 +1,43 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/openclaw-memory-libravdb"
-  version "1.3.18"
+  version "1.3.19"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "6a395c4ac50d3383e2c602584ac9c2a5ee74a743486c687f67852049d589051c"
+      sha256 "c7811f7e3d3c432645344e123a3f4d186ea85c3f439b5cb6e0c9ff52cd0577d7"
     else
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "e0d10280839fc9b681bfc633a9f63b0b0e485cc5470358a32f55391f935af4c2"
+      sha256 "3c56a2eff4d6a02aab56633ce9bc51e4ce90abd07b12b83f163f2c8d06d79fe1"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "e84ec5ca2634ed9266c8d5b7d106678157236b591941b79f75880f37e45dda36"
+      sha256 "af04681aa2637f1188839d57721221669fe11bccbfca61679c46f664e126e124"
     else
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "f64b6d525444cc42079a695dfb60dcd8551f2756cea948bcf19c9de51dfa858e"
+      sha256 "a112383f6c993bd6c48662d6affbcdccc555e5843201150d8895eed221a48925"
     end
   end
 
   if OS.mac?
     resource "onnxruntime" do
       url "https://github.com/microsoft/onnxruntime/releases/download/v1.23.0/onnxruntime-osx-universal2-1.23.0.tgz"
-      sha256 :no_check
+      sha256 "5e4365fb4a05aef353f6232b9a1848f37e608c421c9227e9224572205c0cfc08"
     end
   elsif OS.linux?
     if Hardware::CPU.arm?
       resource "onnxruntime" do
         url "https://github.com/microsoft/onnxruntime/releases/download/v1.23.0/onnxruntime-linux-aarch64-1.23.0.tgz"
-        sha256 :no_check # TODO: pin real checksum when Linux ARM64 CI is available
+        sha256 "0b9f47d140411d938e47915824d8daaa424df95a88b5f1fc843172a75168f7a0"
       end
     else
       resource "onnxruntime" do
         url "https://github.com/microsoft/onnxruntime/releases/download/v1.23.0/onnxruntime-linux-x64-1.23.0.tgz"
-        sha256 :no_check # TODO: pin real checksum when Linux AMD64 CI is available
+        sha256 "b6deea7f2e22c10c043019f294a0ea4d2a6c0ae52a009c34847640db75ec5580"
       end
     end
   end
@@ -88,7 +88,7 @@ class Libravdbd < Formula
   end
 
   resource "provision" do
-    url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v1.3.18/provision.sh"
+    url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v1.3.19/provision.sh"
     sha256 "4835cf3e11a5da087ada28a03797b3dc44962f0a2306ec2c1482851b24eb4448"
   end
 
