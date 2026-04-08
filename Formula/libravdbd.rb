@@ -6,20 +6,20 @@ class Libravdbd < Formula
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "b984ddf52bfead14d31d5ff76ec8f86acee3163861b27172f89eb2be276247e4"
+      sha256 "c6c24015486429dcac8a66a3fa48a0b62f640a1fa6e0a78b542e6ecca8a0430e"
     else
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "09929e184d3df5e023c0c1381065c92b8511d9e66a5c34acc7f0cb21db9cbbf1"
+      sha256 "f45567094fb5051809894beeaa2f231f80435cdc2282bd1fd03b7ad7efe7e58f"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "eda3346caac8f082fd3c4cdad42d4e746988061d4234d4971bdb6fd670e2359f"
+      sha256 "752bdb340290bd623f45df586c8bc4ccc7ee8926e69970e367860d6ae714b87f"
     else
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "fbea162448fe08de0cb62ea0c379d38e5eea8f346f96ba3681d3dc48e4a3f5e0"
+      sha256 "b8ebd91415c115ff44da2c97608a0152871d9935874ba466a7aab9a30bf372d0"
     end
   end
 
