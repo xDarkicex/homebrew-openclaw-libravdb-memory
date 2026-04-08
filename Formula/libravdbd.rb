@@ -1,25 +1,25 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/openclaw-memory-libravdb"
-  version "1.3.17"
+  version "1.3.18"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "97c46e92ce2966090f1a650c0b47086d5556f33d42a62b210645328d041f24b4"
+      sha256 "6a395c4ac50d3383e2c602584ac9c2a5ee74a743486c687f67852049d589051c"
     else
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "300cd1fc191b4dee7ebaaddb677aadc23f533cefd7025df7e13b8c7332490ed6"
+      sha256 "e0d10280839fc9b681bfc633a9f63b0b0e485cc5470358a32f55391f935af4c2"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "58c11489fac29365e4df581377045a19bb9bebdfc6832ed97da0028703ee68cb"
+      sha256 "e84ec5ca2634ed9266c8d5b7d106678157236b591941b79f75880f37e45dda36"
     else
       url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "7701764151d929659bbf78a7772c9ac167fa1b72dbcb9bb5fc2c960c658e28e1"
+      sha256 "f64b6d525444cc42079a695dfb60dcd8551f2756cea948bcf19c9de51dfa858e"
     end
   end
 
@@ -32,12 +32,12 @@ class Libravdbd < Formula
     if Hardware::CPU.arm?
       resource "onnxruntime" do
         url "https://github.com/microsoft/onnxruntime/releases/download/v1.23.0/onnxruntime-linux-aarch64-1.23.0.tgz"
-        sha256 :no_check
+        sha256 :no_check # TODO: pin real checksum when Linux ARM64 CI is available
       end
     else
       resource "onnxruntime" do
         url "https://github.com/microsoft/onnxruntime/releases/download/v1.23.0/onnxruntime-linux-x64-1.23.0.tgz"
-        sha256 :no_check
+        sha256 :no_check # TODO: pin real checksum when Linux AMD64 CI is available
       end
     end
   end
@@ -54,12 +54,12 @@ class Libravdbd < Formula
 
   resource "all-minilm-l6-v2-model" do
     url "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx"
-    sha256 "759c3cd2b7fe7e93933ad23c4c9181b7396442a2ed746ec7c1d46192c469c46e"
+    sha256 "6fd5d72fe4589f189f8ebc006442dbb529bb7ce38f8082112682524616046452"
   end
 
   resource "all-minilm-l6-v2-tokenizer" do
     url "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json"
-    sha256 "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0"
+    sha256 "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037"
   end
 
   resource "t5-small-encoder" do
@@ -88,7 +88,7 @@ class Libravdbd < Formula
   end
 
   resource "provision" do
-    url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v#{version}/provision.sh"
+    url "https://github.com/xDarkicex/openclaw-memory-libravdb/releases/download/v1.3.18/provision.sh"
     sha256 "4835cf3e11a5da087ada28a03797b3dc44962f0a2306ec2c1482851b24eb4448"
   end
 
@@ -107,7 +107,13 @@ class Libravdbd < Formula
     t5_dir.mkpath
 
     resource("onnxruntime").stage do
-      cp_r Dir["onnxruntime-*"].first, runtime_dir
+      # Homebrew may auto-strip the top-level dir from the tgz
+      subdir = Dir["onnxruntime-*"].first
+      if subdir
+        cp_r "#{subdir}/.", runtime_dir
+      else
+        cp_r ".", runtime_dir
+      end
     end
 
     resource("nomic-embed-text-v1.5-model").stage do
@@ -143,12 +149,14 @@ class Libravdbd < Formula
     end
     write_summarizer_manifest(t5_dir, "t5-small")
 
-    libexec.install resource("provision")
+    resource("provision").stage do
+      libexec.install "provision.sh"
+    end
     chmod 0755, libexec/"provision.sh"
   end
 
   def post_install
-    (var/"clawdb/data").mkpath
+    (var/"clawdb").mkpath
     (var/"clawdb/run").mkpath
   end
 
@@ -160,7 +168,8 @@ class Libravdbd < Formula
 
         #{libexec}/provision.sh --target #{prefix}/models
 
-      Data directory:   #{var}/clawdb/data
+      Data directory:   #{var}/clawdb
+      Database file:    #{var}/clawdb/data.libravdb
       Socket directory: #{var}/clawdb/run
     EOS
   end
@@ -202,7 +211,8 @@ class Libravdbd < Formula
   service do
     run [opt_bin/"libravdbd", "serve"]
     environment_variables LIBRAVDB_RPC_ENDPOINT: "unix:#{var}/clawdb/run/libravdb.sock",
-                          LIBRAVDB_DB_PATH: "#{var}/clawdb/data",
+                          LIBRAVDB_DB_PATH: "#{var}/clawdb/data.libravdb",
+                          LIBRAVDB_ONNX_RUNTIME: "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib",
                           LIBRAVDB_SUMMARIZER_BACKEND: "bundled"
     keep_alive true
     working_dir var/"clawdb"
