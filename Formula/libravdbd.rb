@@ -1,25 +1,25 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory"
-  version "1.4.16"
+  version "1.4.17"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "59c4b96d3a7b8d943eb09625c0458f6ce662019e1b438188d092d28b23b053a8"
+      sha256 "48f9e8cbf63973621fc1c2b14229ae5f812c57863073768672637ea5a18b5686"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "18f3258d8855dda505d42a30dd1de21c9c579815d2fad31d98d1d930255268b5"
+      sha256 "82c1fbf7bc432216e6573ca87c09413b8a0e81bb733eb25405aad44fb5645bc4"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "b31a0bfd4926da5ed740dfc843bc2a3811c4c51d3bb5d839bc249d426d8fa801"
+      sha256 "1c0d9d661e9f63a399c7b9b42c73d8c7f4875c50599168e1f3ba6d2cac97cf60"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "01ecae4dcbf7ff0c5216d10c4140156db45eabe8c1d152c84d85a0911deb0d4e"
+      sha256 "3b7685f672b22ec8fc2049e3283755d0d92bd8e866491cd231b8a459ae6e3acd"
     end
   end
 
@@ -88,7 +88,7 @@ class Libravdbd < Formula
   end
 
   resource "provision" do
-    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.16/provision.sh"
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.17/provision.sh"
     sha256 "4835cf3e11a5da087ada28a03797b3dc44962f0a2306ec2c1482851b24eb4448"
   end
 
@@ -212,7 +212,7 @@ class Libravdbd < Formula
     run [opt_bin/"libravdbd", "serve"]
     environment_variables LIBRAVDB_RPC_ENDPOINT: "unix:#{var}/clawdb/run/libravdb.sock",
                           LIBRAVDB_DB_PATH: "#{var}/clawdb/data.libravdb",
-                          LIBRAVDB_ONNX_RUNTIME: "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib",
+                          LIBRAVDB_ONNX_RUNTIME: (OS.mac? ? "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib" : "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so"),
                           LIBRAVDB_SUMMARIZER_BACKEND: "bundled"
     keep_alive true
     working_dir var/"clawdb"
