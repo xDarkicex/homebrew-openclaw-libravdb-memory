@@ -1,25 +1,25 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory"
-  version "1.4.28"
+  version "1.4.29"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "c584d19baa6e53e804c7fb778aaf52c9924435a22b7df98debccbbfd082b6ff5"
+      sha256 "24bccc4413aceb1c5851579917b3c21b706eedd583c97aa70aa42fd25babfef8"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "9052f17164bbe7d6c84acc12d4512fc0a7bc910fdfc4012b428ad950d1db0cc3"
+      sha256 "f3bb2fb2d906c3e402cd70f6c740cce73ba92ed763b4d829a7e7f8d973020197"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "f8fb08dbaafaa85efab4b64e7c26cdd3d2007f89af9bec76b05a3cbd5101ab89"
+      sha256 "c2025d373cd0b923239034032d52fb235574778b55dec313c1784b339a6aa946"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "b5c3758010e98dcb4d5ab877a4e744158175fd98d603ef0679bd8bf03d77d0ff"
+      sha256 "fd1dd16703a3831f4b7e67b231d7f404f022a381482e0fe979d5162f0a4e903a"
     end
   end
 
@@ -95,7 +95,7 @@ class Libravdbd < Formula
   end
 
   resource "provision" do
-    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.28/provision.sh"
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.29/provision.sh"
     sha256 "f145f78feaeeae2be62fbc3e01a3ce16d214bc815b5238405330927fe27303da"
   end
 
@@ -163,8 +163,8 @@ class Libravdbd < Formula
   end
 
   def post_install
-    (var/"clawdb").mkpath
-    (var/"clawdb/run").mkpath
+    (var/"libravdbd").mkpath
+    (var/"libravdbd/run").mkpath
   end
 
   def caveats
@@ -175,9 +175,9 @@ class Libravdbd < Formula
 
         #{libexec}/provision.sh --target #{prefix}/models
 
-      Data directory:   #{var}/clawdb
-      Database file:    #{var}/clawdb/data.libravdb
-      Socket directory: #{var}/clawdb/run
+      Data directory:   #{var}/libravdbd
+      Database file:    #{var}/libravdbd/data.libravdb
+      Socket directory: #{var}/libravdbd/run
     EOS
   end
 
@@ -217,12 +217,12 @@ class Libravdbd < Formula
 
   service do
     run [opt_bin/"libravdbd", "serve"]
-    environment_variables LIBRAVDB_RPC_ENDPOINT: "unix:#{var}/clawdb/run/libravdb.sock",
-                          LIBRAVDB_DB_PATH: "#{var}/clawdb/data.libravdb",
+    environment_variables LIBRAVDB_RPC_ENDPOINT: "unix:#{var}/libravdbd/run/libravdb.sock",
+                          LIBRAVDB_DB_PATH: "#{var}/libravdbd/data.libravdb",
                           LIBRAVDB_ONNX_RUNTIME: (OS.mac? ? "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib" : "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so"),
                           LIBRAVDB_SUMMARIZER_BACKEND: "bundled"
     keep_alive true
-    working_dir var/"clawdb"
+    working_dir var/"libravdbd"
   end
 
   test do
