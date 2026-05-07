@@ -1,25 +1,25 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory"
-  version "1.4.29"
+  version "1.4.32"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "24bccc4413aceb1c5851579917b3c21b706eedd583c97aa70aa42fd25babfef8"
+      sha256 "1faabd971bc98bd35bdbae8f45560720e715f62917c78b634add261d4e4663dd"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "f3bb2fb2d906c3e402cd70f6c740cce73ba92ed763b4d829a7e7f8d973020197"
+      sha256 "750e300defeab26439f4236e09237cbb430fbc0e9c11940d6d4254d8d14c2ff4"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "c2025d373cd0b923239034032d52fb235574778b55dec313c1784b339a6aa946"
+      sha256 "499c35aaa4e2942c385e00682a76e63b43529cebbb9f4f8e66dbefa44129d0ea"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "fd1dd16703a3831f4b7e67b231d7f404f022a381482e0fe979d5162f0a4e903a"
+      sha256 "1e6347da1b446050ed8c6daca01a4668c07ab1d974300435219a53efcb3f2d47"
     end
   end
 
@@ -59,44 +59,20 @@ class Libravdbd < Formula
     sha256 "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66"
   end
 
-  resource "all-minilm-l6-v2-model" do
-    url "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx"
-    sha256 "6fd5d72fe4589f189f8ebc006442dbb529bb7ce38f8082112682524616046452"
+  resource "bge-small-en-v1.5-model" do
+    url "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/onnx/model.onnx"
+    sha256 "828e1496d7fabb79cfa4dcd84fa38625c0d3d21da474a00f08db0f559940cf35"
   end
 
-  resource "all-minilm-l6-v2-tokenizer" do
-    url "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json"
-    sha256 "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037"
+  resource "bge-small-en-v1.5-tokenizer" do
+    url "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/tokenizer.json"
+    sha256 "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66"
   end
 
-  resource "t5-small-encoder" do
-    url "https://huggingface.co/optimum/t5-small/resolve/main/encoder_model.onnx"
-    sha256 "41d326633f1b85f526508cc0db78a5d40877c292c1b6dccae2eacd7d2a53480d"
-  end
-
-  resource "t5-small-decoder" do
-    url "https://huggingface.co/optimum/t5-small/resolve/main/decoder_model.onnx"
-    sha256 "0a1451011d61bcc796a87b7306c503562e910f110f884d0cc08532972c2cc584"
-  end
-
-  resource "t5-small-tokenizer" do
-    url "https://huggingface.co/optimum/t5-small/resolve/main/tokenizer.json"
-    sha256 "5f0ed8ab5b8cfa9812bb73752f1d80c292e52bcf5a87a144dc9ab2d251056cbb"
-  end
-
-  resource "t5-small-tokenizer-config" do
-    url "https://huggingface.co/optimum/t5-small/resolve/main/tokenizer_config.json"
-    sha256 "4969f8d76ef05a16553bd2b07b3501673ae8d36972aea88a0f78ad31a3ff2de9"
-  end
-
-  resource "t5-small-config" do
-    url "https://huggingface.co/optimum/t5-small/resolve/main/config.json"
-    sha256 "d112428e703aa7ea0d6b17a77e9739fcc15b87653779d9b7942d5ecbc61c00ed"
-  end
 
   resource "provision" do
-    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.29/provision.sh"
-    sha256 "f145f78feaeeae2be62fbc3e01a3ce16d214bc815b5238405330927fe27303da"
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.32/provision.sh"
+    sha256 "b358bdb9dbdf28b522b49caf4bb5b8db29a792fa92e9770e179fd030d87b70a0"
   end
 
   def install
@@ -105,13 +81,11 @@ class Libravdbd < Formula
     models_dir = prefix/"models"
     runtime_dir = models_dir/"onnxruntime"
     nomic_dir = models_dir/"nomic-embed-text-v1.5"
-    minilm_dir = models_dir/"all-minilm-l6-v2"
-    t5_dir = models_dir/"t5-small"
+    bge_dir = models_dir/"bge-small-en-v1.5"
 
     runtime_dir.mkpath
     nomic_dir.mkpath
-    minilm_dir.mkpath
-    t5_dir.mkpath
+    bge_dir.mkpath
 
     resource("onnxruntime").stage do
       # Homebrew may auto-strip the top-level dir from the tgz
@@ -131,30 +105,13 @@ class Libravdbd < Formula
     end
     write_embedding_manifest(nomic_dir, "nomic-embed-text-v1.5", 768)
 
-    resource("all-minilm-l6-v2-model").stage do
-      cp "model.onnx", minilm_dir/"model.onnx"
+    resource("bge-small-en-v1.5-model").stage do
+      cp "model.onnx", bge_dir/"model.onnx"
     end
-    resource("all-minilm-l6-v2-tokenizer").stage do
-      cp "tokenizer.json", minilm_dir/"tokenizer.json"
+    resource("bge-small-en-v1.5-tokenizer").stage do
+      cp "tokenizer.json", bge_dir/"tokenizer.json"
     end
-    write_embedding_manifest(minilm_dir, "all-minilm-l6-v2", 384)
-
-    resource("t5-small-encoder").stage do
-      cp "encoder_model.onnx", t5_dir/"encoder_model.onnx"
-    end
-    resource("t5-small-decoder").stage do
-      cp "decoder_model.onnx", t5_dir/"decoder_model.onnx"
-    end
-    resource("t5-small-tokenizer").stage do
-      cp "tokenizer.json", t5_dir/"tokenizer.json"
-    end
-    resource("t5-small-tokenizer-config").stage do
-      cp "tokenizer_config.json", t5_dir/"tokenizer_config.json"
-    end
-    resource("t5-small-config").stage do
-      cp "config.json", t5_dir/"config.json"
-    end
-    write_summarizer_manifest(t5_dir, "t5-small")
+    write_embedding_manifest(bge_dir, "bge-small-en-v1.5", 384)
 
     resource("provision").stage do
       libexec.install "provision.sh"
@@ -201,26 +158,12 @@ class Libravdbd < Formula
     JSON
   end
 
-  def write_summarizer_manifest(dir, profile)
-    File.write(dir/"summarizer.json", <<~JSON)
-      {
-        "backend": "onnx-local",
-        "profile": "#{profile}",
-        "family": "#{profile}",
-        "encoder": "encoder_model.onnx",
-        "decoder": "decoder_model.onnx",
-        "tokenizer": "tokenizer.json",
-        "maxContextTokens": 512
-      }
-    JSON
-  end
 
   service do
     run [opt_bin/"libravdbd", "serve"]
     environment_variables LIBRAVDB_RPC_ENDPOINT: "unix:#{var}/libravdbd/run/libravdb.sock",
                           LIBRAVDB_DB_PATH: "#{var}/libravdbd/data.libravdb",
-                          LIBRAVDB_ONNX_RUNTIME: (OS.mac? ? "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib" : "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so"),
-                          LIBRAVDB_SUMMARIZER_BACKEND: "bundled"
+                          LIBRAVDB_ONNX_RUNTIME: (OS.mac? ? "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib" : "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so")
     keep_alive true
     working_dir var/"libravdbd"
   end
