@@ -165,7 +165,8 @@ class Libravdbd < Formula
     run [opt_bin/"libravdbd", "serve"]
     environment_variables LIBRAVDB_RPC_ENDPOINT: "unix:#{var}/libravdbd/run/libravdb.sock",
                           LIBRAVDB_DB_PATH: "#{var}/libravdbd/data.libravdb",
-                          LIBRAVDB_ONNX_RUNTIME: (OS.mac? ? "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib" : "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so")
+                          LIBRAVDB_ONNX_RUNTIME: (OS.mac? ? "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib" : "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so"),
+                          LIBRAVDB_EMBED_TIMEOUT: "5m"
     keep_alive true
     working_dir var/"libravdbd"
   end
