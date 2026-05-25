@@ -1,25 +1,25 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory"
-  version "1.4.84"
+  version "1.4.86"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "85af3b984559ec8d31c474c208e80e808eb95b6027c35d07424d9f7287d80dfd"
+      sha256 "8ae101618dceb866f748a1236fd5d638e496d0e4cf6a34ffecae3ddbf7bb8b3f"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "e75cdc064b204fcedbd7745f19f714f802297f428af665d5e181a74b62514852"
+      sha256 "099b7a4a7a4ac11c77916c51ca842c43b38e657f37eb51754912ddb6f2133dcd"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "b4766fe07e72e2847ce18797684d87f513b4b0b14204042242334ee902cec892"
+      sha256 "dce31280b202b5589fc1232a22aec961a7369693d80969fed1c74926373d0d9f"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "6ab600d286fa496b9eec1931e88c62627de800a64e1e5801b8608b9c28d50c85"
+      sha256 "8b32880bc095fb33eddcf7ab14ed4ba300b0d0027b555e5068c7ac54535e7ad0"
     end
   end
 
@@ -51,6 +51,32 @@ class Libravdbd < Formula
     end
   end
 
+  if OS.mac?
+    if Hardware::CPU.arm?
+      resource "llama.cpp" do
+        url "https://github.com/ggml-org/llama.cpp/releases/download/b6862/llama-b6862-bin-macos-arm64.zip"
+        sha256 "8950d8f0714edbb6405ba860c24d101ec2163b4db0e68e404b901fc87a419266"
+      end
+    else
+      resource "llama.cpp" do
+        url "https://github.com/ggml-org/llama.cpp/releases/download/b6862/llama-b6862-bin-macos-x64.zip"
+        sha256 "c026b27e85748805370d040776bd37c223a3f5a2e6f43e4beee005df8c5f5904"
+      end
+    end
+  elsif OS.linux?
+    if Hardware::CPU.arm?
+      resource "llama.cpp" do
+        url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/llama-b6862-linux-arm64/llama-b6862-bin-ubuntu-arm64.zip"
+        sha256 "3c026bb0b8319311dc0ba929252d3b4b6e77ff11ec5b7d5e93a345cd417705ec"
+      end
+    else
+      resource "llama.cpp" do
+        url "https://github.com/ggml-org/llama.cpp/releases/download/b6862/llama-b6862-bin-ubuntu-x64.zip"
+        sha256 "39bdf1c5d0cc133b9b47e5b15bca7e8ce25176b6de1e3a650d53531b268f7739"
+      end
+    end
+  end
+
   resource "nomic-embed-text-v1.5-model" do
     url "https://huggingface.co/nomic-ai/nomic-embed-text-v1.5/resolve/main/onnx/model.onnx"
     sha256 "147d5aa88c2101237358e17796cf3a227cead1ec304ec34b465bb08e9d952965"
@@ -73,8 +99,8 @@ class Libravdbd < Formula
 
 
   resource "provision" do
-    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.84/provision.sh"
-    sha256 "0d6fca56798807bdc8f34c94b4375bb74adcfce6f1427527b30b6a11e7c1f130"
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.86/provision.sh"
+    sha256 "c50647b31077488230284f0f0d44c4cc4435f056e7a7520884dda6afdd72ad43"
   end
 
   def install
@@ -114,6 +140,25 @@ class Libravdbd < Formula
       cp "tokenizer.json", bge_dir/"tokenizer.json"
     end
     write_embedding_manifest(bge_dir, "bge-small-en-v1.5", 384)
+
+    llama_dir = models_dir/"llama"
+    llama_dir.mkpath
+    resource("llama.cpp").stage do
+      # The llama.cpp zips contain a nested build/bin or just flat files depending on platform.
+      # Homebrew extracts everything. We just need to find the library.
+      lib_path = Dir["**/*.dylib", "**/*.so"].first
+      if lib_path
+        # Copy to the exact structure provision.sh creates so they match
+        target_platform = if OS.mac?
+                            Hardware::CPU.arm? ? "darwin-arm64" : "darwin-amd64"
+                          else
+                            Hardware::CPU.arm? ? "linux-arm64" : "linux-amd64"
+                          end
+        target_lib_dir = llama_dir/"llama-#{target_platform}/lib"
+        target_lib_dir.mkpath
+        cp lib_path, target_lib_dir/File.basename(lib_path)
+      end
+    end
 
     resource("provision").stage do
       libexec.install "provision.sh"
@@ -163,9 +208,16 @@ class Libravdbd < Formula
 
   service do
     run [opt_bin/"libravdbd", "serve"]
+    target_platform = if OS.mac?
+                        Hardware::CPU.arm? ? "darwin-arm64" : "darwin-amd64"
+                      else
+                        Hardware::CPU.arm? ? "linux-arm64" : "linux-amd64"
+                      end
+    llama_lib_ext = OS.mac? ? "dylib" : "so"
     environment_variables LIBRAVDB_GRPC_ENDPOINT: "unix:#{var}/libravdbd/run/libravdb.sock",
                           LIBRAVDB_DB_PATH: "#{var}/libravdbd/data.libravdb",
-                          LIBRAVDB_ONNX_RUNTIME: (OS.mac? ? "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib" : "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so")
+                          LIBRAVDB_ONNX_RUNTIME: (OS.mac? ? "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib" : "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so"),
+                          LIBRAVDB_LLAMA_LIB: "#{opt_prefix}/models/llama/llama-#{target_platform}/lib/libllama.#{llama_lib_ext}"
     keep_alive true
     working_dir var/"libravdbd"
     log_path var/"log/libravdbd.log"
