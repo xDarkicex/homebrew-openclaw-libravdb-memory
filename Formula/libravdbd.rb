@@ -1,25 +1,25 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory"
-  version "1.4.90"
+  version "1.4.91"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "a377234b8f05ce770b011bb8c45f8927e6fc4f11dcd46ad51bb051ff063bc47f"
+      sha256 "6accfe5d43636bdbc3c19d2f7e02adb634c9d5706f61f8103b213c75a09cfbce"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "cb4729ca506eadcd9f7164cef4e62933ec79e5b4d8041f94e1f2227f6f9490e1"
+      sha256 "df77790d5f1ed11f9fa915b3a369cb9b33147ce56967cd203523e4bd2b9132ac"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "b0d2b50441c0075e8e3f7c04e0d64055ee0c75eba933f9a7765f9914ae0b0b2c"
+      sha256 "7621a0071622320f81983b4a5273922cdc9d43cf8340982c342da9231ae54025"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "9b0d3f44295fbf3a4e71a5b4763bd8e537033200421821ab93f806d9a81c5f2a"
+      sha256 "90c470b485f6d66adc54ddd0499973d84270b5c5ea9edaecde40f2c8be9521de"
     end
   end
 
@@ -55,7 +55,7 @@ class Libravdbd < Formula
     if Hardware::CPU.arm?
       resource "llama.cpp" do
         url "https://github.com/ggml-org/llama.cpp/releases/download/b6862/llama-b6862-bin-macos-arm64.zip"
-        sha256 "8950d8f0714edbb6405ba860c24d101ec2163b4db0e68e404b901fc87a419266"
+        sha256 "aac7f2f3e7f7b495d6c9948c9fecfe667837f72696027181d96e18b4591680ba"
       end
     else
       resource "llama.cpp" do
@@ -99,7 +99,7 @@ class Libravdbd < Formula
 
 
   resource "provision" do
-    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.90/provision.sh"
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.91/provision.sh"
     sha256 "c50647b31077488230284f0f0d44c4cc4435f056e7a7520884dda6afdd72ad43"
   end
 
@@ -144,19 +144,17 @@ class Libravdbd < Formula
     llama_dir = models_dir/"llama"
     llama_dir.mkpath
     resource("llama.cpp").stage do
-      # The llama.cpp zips contain a nested build/bin or just flat files depending on platform.
-      # Homebrew extracts everything. We just need to find the library.
-      lib_path = Dir["**/*.dylib", "**/*.so"].first
-      if lib_path
-        # Copy to the exact structure provision.sh creates so they match
-        target_platform = if OS.mac?
-                            Hardware::CPU.arm? ? "darwin-arm64" : "darwin-amd64"
-                          else
-                            Hardware::CPU.arm? ? "linux-arm64" : "linux-amd64"
-                          end
-        target_lib_dir = llama_dir/"llama-#{target_platform}/lib"
-        target_lib_dir.mkpath
-        cp lib_path, target_lib_dir/File.basename(lib_path)
+      # The llama.cpp zips contain multiple .dylib/.so files.
+      # Copy ALL of them so libllama.dylib is not missed.
+      target_platform = if OS.mac?
+                          Hardware::CPU.arm? ? "darwin-arm64" : "darwin-amd64"
+                        else
+                          Hardware::CPU.arm? ? "linux-arm64" : "linux-amd64"
+                        end
+      target_lib_dir = llama_dir/"llama-#{target_platform}/lib"
+      target_lib_dir.mkpath
+      Dir["**/*.dylib", "**/*.so"].each do |lib_file|
+        cp lib_file, target_lib_dir/File.basename(lib_file)
       end
     end
 
