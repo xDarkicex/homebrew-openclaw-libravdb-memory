@@ -1,25 +1,25 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory"
-  version "1.4.91"
+  version "1.4.93"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "6accfe5d43636bdbc3c19d2f7e02adb634c9d5706f61f8103b213c75a09cfbce"
+      sha256 "2f9d7eabece79ae7cd1c6ef3c5c62bfb80904732b65dbdcb4dbbbf64c1149105"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "df77790d5f1ed11f9fa915b3a369cb9b33147ce56967cd203523e4bd2b9132ac"
+      sha256 "2a52c1de8425cf76e549aeedbf3e51d707d5abee81ec71c9f98407a1b36bdc16"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "7621a0071622320f81983b4a5273922cdc9d43cf8340982c342da9231ae54025"
+      sha256 "709fb51ba2fc86a5cda566e7a29498010b2513b2b921b8d5fb72edaa90107d9e"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "90c470b485f6d66adc54ddd0499973d84270b5c5ea9edaecde40f2c8be9521de"
+      sha256 "1b976a940848d6f027cd45bc4a70c390705c8bcb61b3bbca22208f53d2690904"
     end
   end
 
@@ -97,10 +97,15 @@ class Libravdbd < Formula
     sha256 "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66"
   end
 
+  resource "nomic-embed-text-v1.5-gguf" do
+    url "https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF/resolve/main/nomic-embed-text-v1.5.Q8_0.gguf"
+    sha256 "3e24342164b3d94991ba9692fdc0dd08e3fd7362e0aacc396a9a5c54a544c3b7"
+  end
+
 
   resource "provision" do
-    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.91/provision.sh"
-    sha256 "c50647b31077488230284f0f0d44c4cc4435f056e7a7520884dda6afdd72ad43"
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.4.93/provision.sh"
+    sha256 "9775a425df4592b8962a044b802781db2b3691022e38eb88f9e16ac24ef98333"
   end
 
   def install
@@ -156,6 +161,11 @@ class Libravdbd < Formula
       Dir["**/*.dylib", "**/*.so"].each do |lib_file|
         cp lib_file, target_lib_dir/File.basename(lib_file)
       end
+    end
+
+    # Install GGUF model — searched in <exe>/models/<profile>/ by resolveGGUFModelPath
+    resource("nomic-embed-text-v1.5-gguf").stage do
+      cp "nomic-embed-text-v1.5.Q8_0.gguf", nomic_dir/"nomic-embed-text-v1.5.Q8_0.gguf"
     end
 
     resource("provision").stage do
