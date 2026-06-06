@@ -1,26 +1,26 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory"
-  version "1.8.12"
+  version "1.8.13"
   license "Proprietary"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "0bb9e13962f7c0247f231f390b441b3d09afdf8c736fe47e0731b70f683f8b89"
+      sha256 "0a57658314887270c01a782055e4fa24605479b233602b7d412f7c5c2d6bd67a"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "0cf4dceed092ed952415632567fbf277e87d1027a25c28b49c8f079b79ce3482"
+      sha256 "791c9e676461c2065d3f75ef48f7511a6a27d08b077b428a991aeed8f85210bb"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "ad98f00e5f284b28d898d2b672c2ad3adb237331f2118362cea8336451340e35"
+      sha256 "54dec541c6e885ff822c1607abc48fa265fe98269c2368eaca6bd7454492b61f"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "010c07cff48a665c67e168faff51a305093b3b5833104b16ae60cc42176d21b1"
+      sha256 "070822cf59eba3b882ef824e8bbe5c4f606f7d160885cc84030926467e401471"
     end
   end
 
@@ -105,7 +105,7 @@ class Libravdbd < Formula
 
 
   resource "provision" do
-    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.8.12/provision.sh"
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.8.13/provision.sh"
     sha256 "9775a425df4592b8962a044b802781db2b3691022e38eb88f9e16ac24ef98333"
   end
 
@@ -182,9 +182,18 @@ class Libravdbd < Formula
 
   def caveats
     <<~EOS
-      libravdbd requires ONNX embedding models to function.  Models are
-      automatically provisioned during `brew install`.  To re-provision
-      or repair assets manually:
+      The daemon defaults to the ONNX embedding backend. A faster native GGUF /
+      llama.cpp backend is also available. A GGUF model and libllama are
+      provisioned alongside the ONNX assets during `brew install`.
+
+      To enable the GGUF backend, set the environment variable:
+
+        LIBRAVDB_EMBEDDING_BACKEND=gguf
+
+      or add `embedding_backend: gguf` to your config YAML. A worked template:
+        https://github.com/xDarkicex/openclaw-memory-libravdb/blob/main/docs/yaml/default-gguf.yaml
+
+      To re-provision or repair assets manually:
 
         #{libexec}/provision.sh --target #{prefix}/models
 
