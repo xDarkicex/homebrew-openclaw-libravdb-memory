@@ -1,26 +1,26 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory"
-  version "1.8.21"
+  version "1.8.22"
   license "Proprietary"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "f6acb03020f485f40dac4b65c798519fe4d8c1921f85f8cbb25af6f72fa34858"
+      sha256 "464a17651ae24948d7f145dec1e708b60262bd45f55303d63ece061128b1471f"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "9c39a23875e101d21733255fddce26fc31d0944ee497ff13d52042c3dbadf193"
+      sha256 "8aada00b93ef6530619af3b25c270fbfee16df4b933fa5a8caf8142bd1fc8545"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "08081f52d22e862df2adc7ffd83929934511af7f1720207cbc30bd200684d1e2"
+      sha256 "f79ad3713cf7ad79a2a0c684ea149326131c69ddd7c2559a0e9e7beef88dfc96"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "709f70d195ae092864dc882fcbce3c2479b2a2acd05e880dc09677b915a4cc88"
+      sha256 "4b6e129b51fee98930ed6aba92aa46e741ce5ea2a65f8da7429ad39191e8f928"
     end
   end
 
@@ -105,7 +105,7 @@ class Libravdbd < Formula
 
 
   resource "provision" do
-    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.8.21/provision.sh"
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.8.22/provision.sh"
     sha256 "9775a425df4592b8962a044b802781db2b3691022e38eb88f9e16ac24ef98333"
   end
 
