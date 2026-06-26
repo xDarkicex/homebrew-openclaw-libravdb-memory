@@ -1,26 +1,26 @@
 class Libravdbd < Formula
   desc "Local LibraVDB daemon for the OpenClaw memory plugin"
   homepage "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory"
-  version "1.8.22"
+  version "1.9.0"
   license "Proprietary"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "464a17651ae24948d7f145dec1e708b60262bd45f55303d63ece061128b1471f"
+      sha256 "8aca3dbd1f0f9ddf48923add19e8a0bb6d8a5418b051faba36c565892f7a1b44"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "8aada00b93ef6530619af3b25c270fbfee16df4b933fa5a8caf8142bd1fc8545"
+      sha256 "834369c69426a59527d46bae2ac8fedd03cc0f87935618c13379ca54d868534a"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "f79ad3713cf7ad79a2a0c684ea149326131c69ddd7c2559a0e9e7beef88dfc96"
+      sha256 "c0839b6af1132726ff2dcebdca4e6209f17c7e740a53612302d72d29c85a8002"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "4b6e129b51fee98930ed6aba92aa46e741ce5ea2a65f8da7429ad39191e8f928"
+      sha256 "9c7bfd5c396091a1e1601541932a525bdb2f7c143a22ccce4bac65a5a8801cdf"
     end
   end
 
@@ -105,12 +105,26 @@ class Libravdbd < Formula
 
 
   resource "provision" do
-    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.8.22/provision.sh"
-    sha256 "9775a425df4592b8962a044b802781db2b3691022e38eb88f9e16ac24ef98333"
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v1.9.0/provision.sh"
+    sha256 "297b24e979de3fc70cda1dbdf3c47403c0ac178a7d1d1f402e8debb978b9d758"
+  end
+
+  resource "cognitive-scanner-model" do
+    url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/cognitive-scanner-v1/cognitive_scanner.bin"
+    sha256 "__SHA256_COGNITIVE_MODEL__"
   end
 
   def install
     bin.install Dir["libravdbd*"].first => "libravdbd"
+
+    models_dir = prefix/"models"
+
+    # Install cognitive scanner model alongside embedding models
+    cognitive_dir = models_dir/"cognitive"
+    cognitive_dir.mkpath
+    resource("cognitive-scanner-model").stage do
+      cp "cognitive_scanner.bin", cognitive_dir/"cognitive_scanner.bin"
+    end
 
     models_dir = prefix/"models"
     runtime_dir = models_dir/"onnxruntime"
