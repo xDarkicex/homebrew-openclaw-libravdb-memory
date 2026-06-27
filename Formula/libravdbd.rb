@@ -7,20 +7,20 @@ class Libravdbd < Formula
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-arm64"
-      sha256 "444edb3e73e454037db337fc361625e04dbafaf780a28fdd74f67aa38d57f25c"
+      sha256 "c1ca67be6c0d797cea5e2c61ee674e1a6fe3bd21bbdc633bc330ccff60de1584"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-darwin-amd64"
-      sha256 "8a8eb4b34fe0fbe01c19ecee8c241b20f4a71552c4b3e254331fb09991d3a40a"
+      sha256 "f34f95ee9a59905d3c3b68eb1320aa3bb8bea363b336112db8afef340b8f029e"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-arm64"
-      sha256 "c9cb031ddf44ffddf885013682e7beb724b125edf87e0d03f6bb5f49fed373ab"
+      sha256 "5342c9178357d064482327dee2ca224bae7c694264a161da24f9f63048af228e"
     else
       url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/v#{version}/libravdbd-linux-amd64"
-      sha256 "317a3f9df96ea4b19d2c65212e694c4f2a71bcade577c9d759676b47b2a71865"
+      sha256 "91837055213e81595a57ba081dbbe601aba1bd0b098003f291754fa61985471f"
     end
   end
 
@@ -111,7 +111,7 @@ class Libravdbd < Formula
 
   resource "cognitive-scanner-model" do
     url "https://github.com/xDarkicex/homebrew-openclaw-libravdb-memory/releases/download/cognitive-scanner-v1/cognitive_scanner.bin"
-    sha256 "__SHA256_COGNITIVE_MODEL__"
+    sha256 "f84f77a0dd19c2d8a118a226a08c78735141aa7567c14c2d9d55cd14eb3de2a4"
   end
 
   def install
