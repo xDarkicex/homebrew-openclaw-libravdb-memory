@@ -211,6 +211,15 @@ class Libravdbd < Formula
 
         #{libexec}/provision.sh --target #{prefix}/models
 
+      The required cognitive scanner model (about 488 MiB) is installed at:
+
+        #{opt_prefix}/models/cognitive/cognitive_scanner.bin
+
+      The Homebrew service configures this path automatically. When launching
+      libravdbd under another supervisor, set LIBRAVDB_COGNITIVE_SCANNER_MODEL
+      to that path. Homebrew verifies the model checksum during install and
+      upgrade; the daemon does not download it at runtime.
+
       Data directory:   #{var}/libravdbd
       Database file:    #{var}/libravdbd/data.libravdb
       Socket directory: #{var}/libravdbd/run
@@ -241,15 +250,24 @@ class Libravdbd < Formula
   service do
     run [opt_bin/"libravdbd", "serve"]
     target_platform = if OS.mac?
-                        Hardware::CPU.arm? ? "darwin-arm64" : "darwin-amd64"
-                      else
-                        Hardware::CPU.arm? ? "linux-arm64" : "linux-amd64"
-                      end
+      Hardware::CPU.arm? ? "darwin-arm64" : "darwin-amd64"
+    else
+      Hardware::CPU.arm? ? "linux-arm64" : "linux-amd64"
+    end
     llama_lib_ext = OS.mac? ? "dylib" : "so"
-    environment_variables LIBRAVDB_GRPC_ENDPOINT: "unix:#{var}/libravdbd/run/libravdb.sock",
-                          LIBRAVDB_DB_PATH: "#{var}/libravdbd/data.libravdb",
-                          LIBRAVDB_ONNX_RUNTIME: (OS.mac? ? "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib" : "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so"),
-                          LIBRAVDB_LLAMA_LIB: "#{opt_prefix}/models/llama/llama-#{target_platform}/lib/libllama.#{llama_lib_ext}"
+    llama_lib = "#{opt_prefix}/models/llama/llama-#{target_platform}/lib/libllama.#{llama_lib_ext}"
+    onnx_runtime = if OS.mac?
+      "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.dylib"
+    else
+      "#{opt_prefix}/models/onnxruntime/lib/libonnxruntime.so"
+    end
+    environment_variables(
+      LIBRAVDB_GRPC_ENDPOINT:           "unix:#{var}/libravdbd/run/libravdb.sock",
+      LIBRAVDB_DB_PATH:                 "#{var}/libravdbd/data.libravdb",
+      LIBRAVDB_ONNX_RUNTIME:            onnx_runtime,
+      LIBRAVDB_LLAMA_LIB:               llama_lib,
+      LIBRAVDB_COGNITIVE_SCANNER_MODEL: "#{opt_prefix}/models/cognitive/cognitive_scanner.bin",
+    )
     keep_alive true
     working_dir var/"libravdbd"
     log_path var/"log/libravdbd.log"
@@ -257,6 +275,11 @@ class Libravdbd < Formula
   end
 
   test do
+    scanner_model = prefix/"models/cognitive/cognitive_scanner.bin"
+    assert_path_exists scanner_model
+    assert_equal "f84f77a0dd19c2d8a118a226a08c78735141aa7567c14c2d9d55cd14eb3de2a4", scanner_model.sha256
+    assert_includes service.to_systemd_unit,
+                    "LIBRAVDB_COGNITIVE_SCANNER_MODEL=#{opt_prefix}/models/cognitive/cognitive_scanner.bin"
     assert_match "libravdbd", shell_output("#{bin}/libravdbd version")
   end
 end
